@@ -13,7 +13,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Find the latest Ubuntu 22.04 AMI
+
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -30,12 +30,12 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"]
 }
 
-# Find the existing default VPC
+# Default VPC
 data "aws_vpc" "default" {
   default = true
 }
 
-# Create an Internet Gateway
+# Internet Gateway
 resource "aws_internet_gateway" "wordpress" {
   vpc_id = data.aws_vpc.default.id
 
@@ -44,7 +44,7 @@ resource "aws_internet_gateway" "wordpress" {
   }
 }
 
-# Create a subnet
+# Subnet
 resource "aws_subnet" "wordpress" {
   vpc_id     = data.aws_vpc.default.id
   cidr_block = "172.31.0.0/20"
@@ -54,7 +54,7 @@ resource "aws_subnet" "wordpress" {
   }
 }
 
-# Create a route table
+# Route table
 resource "aws_route_table" "wordpress" {
   vpc_id = data.aws_vpc.default.id
 
@@ -63,7 +63,7 @@ resource "aws_route_table" "wordpress" {
   }
 }
 
-# Send internet traffic through the Internet Gateway
+# Internet Gateway
 resource "aws_route" "wordpress_internet" {
   route_table_id         = aws_route_table.wordpress.id
   destination_cidr_block = "0.0.0.0/0"
@@ -76,7 +76,7 @@ resource "aws_route_table_association" "wordpress" {
   route_table_id = aws_route_table.wordpress.id
 }
 
-# Create a security group
+# Security Group
 resource "aws_security_group" "wordpress" {
   name        = "${var.project_name}-sg"
   description = "Security group for WordPress"
@@ -99,7 +99,7 @@ resource "aws_vpc_security_group_egress_rule" "wordpress_all_outbound" {
   ip_protocol       = "-1"
 }
 
-# Create the WordPress EC2 instance
+# Create EC2 instance
 resource "aws_instance" "wordpress" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
